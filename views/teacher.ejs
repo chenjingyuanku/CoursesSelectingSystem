@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>
+<%=title%>
+</title>
+<meta name="description" content="">
+<link rel="shortcut icon" href="images/favicon.ico">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<link rel="stylesheet" href="stylesheets/style.css">
+<!-- 引入 Vue -->
+<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- 引入axios框架 -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body class="bg">
+<div id="app">
+<template>
+<!--
+-->
+<el-container>
+<el-aside width="480px">
+<el-card class="teacher-course-info-box-card">
+<el-carousel height="220px">
+<el-carousel-item v-for="item in valueCourses" :key="item">
+<div class="el-carousel-item-style">
+<h3>课程号：{{ item.course_id }}</h3>
+<h3>课程名：{{ item.course_name }}</h3>
+<h3>上课教室：{{ item.course_room }}</h3>
+</div>
+</el-carousel-item>
+</el-carousel>
+</el-card>
+<el-card class="teacher-info-box-card">
+<el-row :gutter="20">
+<el-col :span="10">
+<div class="grid-content bg-purple">
+<image src=<%=image%>>
+</div>
+</el-col>
+<el-col :span="14">
+<div class="grid-content bg-purple">
+<el-row>
+<div class="imformation-text">
+姓名：
+<%= myName %>
+</div>
+</el-row>
+<el-row>
+<div class="imformation-text">
+性别：
+<%= mySex %>
+</div>
+</el-row>
+<el-row>
+<div class="imformation-text">
+学院：
+<%= myCollege %>
+</div>
+</el-row>
+<el-row>
+<div class="imformation-text">
+编号：
+<%= myID %>
+</div>
+</el-row>
+<el-row>
+<div>
+<el-button type="primary" plain @click="openDialog()">
+修改密码</el-button>
+<el-button type="primary" plain onclick="axios.get('/logout');setTimeout(() => {location.href='/login'}, 100);">
+退出登录</el-button>
+</div>
+</el-row>
+</div>
+</el-col>
+</el-row>
+</el-card>
+</el-aside>
+
+<el-main>
+<el-table fit="false" size="small" :data="tableData" border style="margin:auto;width:100%">
+<el-table-column prop="Num" label="    ">
+</el-table-column>
+<el-table-column prop="Mon" label="周一">
+</el-table-column>
+<el-table-column prop="Tue" label="周二">
+</el-table-column>
+<el-table-column prop="Wed" label="周三">
+</el-table-column>
+<el-table-column prop="Thu" label="周四">
+</el-table-column>
+<el-table-column prop="Fri" label="周五">
+</el-table-column>
+<el-table-column prop="Sat" label="周六">
+</el-table-column>
+<el-table-column prop="Sun" label="周日">
+</el-table-column>
+</el-table>
+
+</el-main>
+<div>
+<el-dialog title="修改密码" :visible.sync="dialogFormVisible" width="30%">
+<el-dialog
+width="30%"
+title="提示"
+:visible.sync="resultDialogVisible"
+append-to-body>
+<span>修改成功！</span>
+<span slot="footer" class="dialog-footer">
+<el-button type="primary" onclick="axios.get('/logout');setTimeout(() => {location.href='/login'}, 100);">确 定</el-button>
+</span>
+</el-dialog>
+<div>
+<el-form :model="changePasswordForm" status-icon :rules="formRules" ref="changePasswordForm">
+<el-form-item label="旧的密码" prop="old" :label-width="formLabelWidth">
+<el-input v-model="changePasswordForm.old" type="password"></el-input>
+</el-form-item>
+<el-form-item label="新的密码" prop="new1" :label-width="formLabelWidth">
+<el-input v-model="changePasswordForm.new1" type="password"></el-input>
+</el-form-item>
+<el-form-item label="再次输入" prop="new2" :label-width="formLabelWidth">
+<el-input v-model="changePasswordForm.new2" type="password"></el-input>
+</el-form-item>
+</el-form>
+</div>
+<span slot="footer" class="dialog-footer">
+<el-button @click="dialogFormVisible = false">取 消</el-button>
+<el-button type="primary" @click="submitForm()">确 定</el-button>
+</span>
+</el-dialog>
+</div>
+</el-container>
+</template>
+</div>
+<script>
+const courseNum = ["第一节", "第二节", "第三节", "第四节", "第五节", "", "第六节", "第七节", "第八节", "第九节", "", "第十节", "第十一节", "第十二节"];
+var changeResult = "";
+var isSubmit = false;
+var Main = {
+el: "#app",
+data: {
+tableData: [],
+valueCourses: [],
+dialogFormVisible: false,
+resultDialogVisible: false,
+formLabelWidth: "90px",
+changePasswordForm: {
+old: "",
+new1: "",
+new2: ""
+},
+formRules: {
+new1: [
+{
+validator: (rule, value, callback) => {
+if (value === '') {
+callback(new Error('请输入密码'));
+} else {
+if (Ctor.$data.changePasswordForm.new2 !== '') {
+Ctor.$refs.changePasswordForm.validateField('new2');
+}
+callback();
+}
+}, trigger: 'blur'
+}
+],
+new2: [
+{
+validator: (rule, value, callback) => {
+if (value === '') {
+callback(new Error('请再次输入密码'));
+} else if (value !== Ctor.$data.changePasswordForm.new1) {
+callback(new Error('两次输入密码不一致!'));
+} else {
+callback();
+}
+}, trigger: 'blur'
+}
+],
+old: [
+{
+validator: function (rule, value, callback) {
+if (value.length < 1) {
+return callback(new Error("密码不能为空"));
+} else {
+if (isSubmit) {
+setTimeout(() => {
+switch (changeResult) {
+case "success":
+Ctor.$data.resultDialogVisible = true;
+callback();
+break;
+case "failed":
+callback(new Error("密码错误"));
+break;
+case "":
+callback(new Error("连接超时"));
+break;
+default:
+callback(new Error("发生错误"));
+break;
+}
+changeResult = "";
+isSubmit = false;
+}, 600);
+}
+else {
+callback();
+}
+}
+}, trigger: 'blur'
+}
+]
+}
+},
+methods: {
+submitForm() {
+Ctor.$refs.changePasswordForm.validate((valid) => {
+if (valid) {
+isSubmit = true;
+axios.post("/change_password", {
+old: Ctor.$data.changePasswordForm.old,
+new: Ctor.$data.changePasswordForm.new1
+})
+.then(function (response) {
+changeResult = response.data;
+})
+.catch(function (error) {
+console.log(error);
+loginState = "error";
+});
+} else {
+console.log("error submit!!");
+return false;
+}
+});
+Ctor.$refs.changePasswordForm.validate((valid) => { });
+
+},
+openDialog() {
+Ctor.$data.dialogFormVisible = true;
+setTimeout(() => {
+Ctor.$refs.changePasswordForm.resetFields();
+}, 100);
+}
+}
+};
+var Ctor = new Vue(Main);
+
+
+
+
+axios.post('/get_my_courses')
+.then(function (response) {
+let count = 0;
+let day = { Num: "", Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" };
+for (let i = 0; i < 14; i++) {
+day = { Num: courseNum[i], Mon: "", Tue: "", Wed: "", Thu: "", Fri: "", Sat: "", Sun: "" };
+Ctor.$data.tableData.push(day);
+}
+response.data.forEach(element => {
+let min, max;
+Ctor.$data.valueCourses.push(element);
+if (element.course_monday != "0-0") {
+min = parseInt(element.course_monday.split("-")[0]);
+max = parseInt(element.course_monday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Mon = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Mon = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Mon = element.course_name;
+}
+}
+if (element.course_tuesday != "0-0") {
+min = parseInt(element.course_tuesday.split("-")[0]);
+max = parseInt(element.course_tuesday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Tue = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Tue = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Tue = element.course_name;
+}
+}
+if (element.course_wednesday != "0-0") {
+min = parseInt(element.course_wednesday.split("-")[0]);
+max = parseInt(element.course_wednesday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Wed = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Wed = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Wed = element.course_name;
+}
+}
+if (element.course_thursday != "0-0") {
+min = parseInt(element.course_thursday.split("-")[0]);
+max = parseInt(element.course_thursday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Thu = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Thu = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Thu = element.course_name;
+}
+}
+if (element.course_friday != "0-0") {
+min = parseInt(element.course_friday.split("-")[0]);
+max = parseInt(element.course_friday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Fri = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Fri = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Fri = element.course_name;
+}
+}
+if (element.course_saturday != "0-0") {
+min = parseInt(element.course_saturday.split("-")[0]);
+max = parseInt(element.course_saturday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Sat = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Sat = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Sat = element.course_name;
+}
+}
+if (element.course_sunday != "0-0") {
+min = parseInt(element.course_sunday.split("-")[0]);
+max = parseInt(element.course_sunday.split("-")[1]);
+for (let i = min; i <= max; i++) {
+if (i >= 6 && i <= 9)
+Ctor.$data.tableData[i].Sun = element.course_name;
+else if (i > 9)
+Ctor.$data.tableData[i + 1].Sun = element.course_name;
+else
+Ctor.$data.tableData[i - 1].Sun = element.course_name;
+}
+}
+});
+
+})
+.catch(function (error) {
+console.log(error);
+});
+</script>
+</body>
+
+</html>
